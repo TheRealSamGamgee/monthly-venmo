@@ -17,7 +17,7 @@ def get_env(env):
       print("   Exiting script. Please add and run again.")
       quit()
 
-env_vars = ["VENMO_ACCESS_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_BOT_TOKEN", "K_FRIEND_ID", "C_FRIEND_ID", "W_FRIEND_ID", "J_FRIEND_ID"]
+env_vars = ["VENMO_ACCESS_TOKEN", "REQUEST_CONFIGS"]
 
 def verify_env_vars(vars, numOfExpected):
   """
@@ -58,8 +58,11 @@ def get_month(now):
     """
 
     month = now.strftime("%B")
-    return month
+    return month 
 
+def determine_access(username, password):
+    access_token = Client.get_access_token(username=username, password=password)
+    print(access_token)
 class Venmo:
     def __init__(self, access_token):
         self.client = Client(access_token=access_token)

@@ -1,9 +1,9 @@
-from venmo_api import Client
 from dotenv import load_dotenv
-from notifiers import get_notifier
 from datetime import datetime
+from operator import methodcaller
+import calendar
 
-from utils import get_env, env_vars, get_month, Venmo, Telegram
+from utils import get_env, env_vars, get_month, Venmo
 
 def main(now):
   """
@@ -15,49 +15,41 @@ def main(now):
   for var in env_vars:
     actualVars.append(get_env(var))
 
-  access_token, chat_id, bot_token, k_friend_id, c_friend_id, w_friend_id, j_friend_id = actualVars
+  access_token, request_configs = actualVars
 
   month = get_month(now)
   venmo = Venmo(access_token)
-  telegram = Telegram(bot_token, chat_id)
+ # telegram = Telegram(bot_token, chat_id)
+  friends = list(map(methodcaller("split", ";"), request_configs.split("|")))
+  print(friends)
 
-  friends =[
-    {
-      "name": "KRam",
-      "id": k_friend_id,
-    },
-    {
-      "name": "Chrissy",
-      "id": c_friend_id,
-    },
-    {
-      "name": "Will",
-      "id": w_friend_id,
-    },
-  ]
 
-  successfulRequests = []
+  successfulRequests = 0
   expectedRequests = len(friends)
 
+  # name = 0, id = 1, purpose = 2, amount = 3, date = 4
   for friend in friends:
-    name = friend["name"]
-    id = friend["id"]
-    description = "Spotify for the month of " + month + "— Sent by Joe's Assistant Efron 🤵🏻‍♂️"
-    amount = 3.00
-    message = f"""Good news old sport!
+    date = int(friend[4])
+    last_day_of_month = calendar.monthrange(now.year, now.month)[1]
 
-I have successfully requested money from {name}.
+    if (date == now.day) or (now.day == last_day_of_month and date > last_day_of_month):
+      name = friend[0]
+      id = friend[1]
+      description = friend[2] + " for the month of " + month + " — Sent by Sam's AI Assistant"
+      amount = friend[3]
+      message = "Successfully requested $" + amount + " from " + name + " for " + description
+      success = venmo.request_money(id, float(amount), description, print(message))#, telegram.send_message(message))
+      if success:
+        successfulRequests+=1
+    else:
+      print("Not due for " + str(date - now.day) + " more days")
+      expectedRequests-=1
+      continue
 
-— Efron 🤵🏻‍♂️
-    """
-    success = venmo.request_money(id, amount, description, telegram.send_message(message))
-    if success:
-      successfulRequests.append(success)
-
-  if len(successfulRequests) == expectedRequests:
+  if successfulRequests == expectedRequests:
     print("✅ Ran script successfully and sent " + str(expectedRequests) + " Venmo requests.")
   else:
-    print("❌ Something went wrong. Only sent " + str(len(successfulRequests)) + "/" + str(expectedRequests) + " venmo requests.")
+    print("❌ Something went wrong. Only sent " + str(successfulRequests) + "/" + str(expectedRequests) + " venmo requests.")
 
 now = datetime.now()
 main(now)

@@ -5,9 +5,8 @@ name: Run Script
 
 on:
   schedule:
-    # 4pm UTC on the 7th of the month
-    # https://crontab.guru/#0_16_7_*_*
-    - cron: "0 16 7 * *"
+    # daily at 4:00 UTC
+    - cron: "0 16 * * *"
   workflow_dispatch:
 
 jobs:
@@ -36,9 +35,6 @@ jobs:
           python init.py
         env:
           VENMO_ACCESS_TOKEN: ${{ secrets.VENMO_ACCESS_TOKEN }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          K_FRIEND_ID: ${{ secrets.K_FRIEND_ID }}
-          C_FRIEND_ID: ${{ secrets.C_FRIEND_ID }}
-          W_FRIEND_ID: ${{ secrets.W_FRIEND_ID }}
-          J_FRIEND_ID: ${{ secrets.J_FRIEND_ID }}
+          #TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          #TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REQUEST_CONFIGS: ${{ secrets.REQUEST_CONFIGS }}
